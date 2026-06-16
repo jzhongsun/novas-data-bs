@@ -121,6 +121,7 @@ def _load_stock_df(path: str = "./output/stock_basic.parquet") -> pd.DataFrame:
 
     # Keep only type=1 (stock), don't filter by status (historical delisted stocks included)
     stock_df["type"] = pd.to_numeric(stock_df["type"], errors="coerce").astype(int)
+    stock_df["status"] = pd.to_numeric(stock_df["status"], errors="coerce").astype(int)
     print(stock_df)
     stock_df = stock_df[stock_df["type"] == 1]
     return stock_df
@@ -296,7 +297,7 @@ def _worker_download_chunk(
                 try:
                     df = pd.read_parquet(cache_file, engine="pyarrow")
                     if not df.empty:
-                        if i % 200 == 0 or i == total:
+                        if i % 50 == 0 or i == total:
                             print(f"[worker] {i}/{total} (cache)", flush=True)
                         continue
                 except Exception:
@@ -1068,9 +1069,11 @@ def split_to_monthly_parquet(
 # ── upload ───────────────────────────────────────────────────────────────────
 
 def upload_to_modelscope(
-    local_dir: str = OUTPUT_DIR,
-    repo_id: str = "",
+    repo_id: str,
     repo_type: str = "dataset",
+    allow_patterns: str = "*.parquet",
+    local_dir: str = OUTPUT_DIR,
+    path_in_repo: str = ""
 ) -> None:
     """Upload *.parquet from local_dir to a ModelScope repository.
 
@@ -1097,8 +1100,8 @@ def upload_to_modelscope(
     api.upload_folder(
         repo_id=repo_id,
         folder_path=local_dir,
-        path_in_repo="stock-day",
-        allow_patterns="*.parquet",
+        path_in_repo=path_in_repo,
+        allow_patterns=allow_patterns,
         commit_message=f"Update stock-day data ({len(files)} files)",
         repo_type=repo_type,
         token=token,
@@ -1144,7 +1147,7 @@ def _cmd_basic(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock_basic.parquet")
 
 
 def _cmd_klines(args: argparse.Namespace) -> None:
@@ -1163,7 +1166,7 @@ def _cmd_klines(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock-day-*.parquet", path_in_repo="daily/")
 
 
 def _cmd_adjust(args: argparse.Namespace) -> None:
@@ -1175,7 +1178,7 @@ def _cmd_adjust(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock-adjust-*.parquet", path_in_repo="adjust/")
 
 
 def _cmd_calendar(args: argparse.Namespace) -> None:
@@ -1184,7 +1187,7 @@ def _cmd_calendar(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock-calendar-*.parquet", path_in_repo="calendar/")
 
 
 def _cmd_forecast(args: argparse.Namespace) -> None:
@@ -1200,7 +1203,7 @@ def _cmd_forecast(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock-forecast-*.parquet", path_in_repo="forecast/")
 
 
 def _cmd_index(args: argparse.Namespace) -> None:
@@ -1216,7 +1219,7 @@ def _cmd_index(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock-index-*.parquet", path_in_repo="index/")
 
 
 def _cmd_dataset(args: argparse.Namespace) -> None:
@@ -1238,7 +1241,7 @@ def _cmd_dataset(args: argparse.Namespace) -> None:
 
     if args.upload:
         _upload_check(args)
-        upload_to_modelscope(repo_id=args.repo_id)
+        upload_to_modelscope(repo_id=args.repo_id, repo_type="dataset", allow_patterns="stock_ohlcv_d.parquet", path_in_repo="")
 
 
 def _cmd_upload(args: argparse.Namespace) -> None:
