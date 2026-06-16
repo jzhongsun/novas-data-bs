@@ -29,7 +29,7 @@ jobs:
         pip install baostock pyarrow modelscope
     - name: Download dataset
       run: |
-        modelscope login
+        modelscope login --token ${{ secrets.MS_TOKEN }}
         modelscope download --dataset ${{ secrets.MS_REPO_ID_RAW }} --local_dir './local_dir'
         ls ./local_dir
       env:
