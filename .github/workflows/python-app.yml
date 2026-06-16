@@ -29,24 +29,23 @@ jobs:
         pip install baostock pyarrow modelscope
     - name: Download baostock data
       run: |
-        # 获取当前年月，然后拼接"01"
         YEAR=$(date +%Y)
         MONTH=$(date +%m)
         FIRST_DAY="${YEAR}-${MONTH}-01"
 
-        # 下个月第一天
         if [ $MONTH -eq 12 ]; then
             NEXT_MONTH_FIRST="${YEAR}-$((YEAR+1))-01-01"
         else
             NEXT_MONTH_FIRST="${YEAR}-$(printf "%02d" $((10#$MONTH + 1)))-01"
         fi
 
-        # 当月最后一天 = 下个月第一天 - 1天
         LAST_DAY=$(date -d "$NEXT_MONTH_FIRST -1 day" +%Y-%m-%d)
         python baostock_data.py basic --upload --repo-id=jzhongsun/novas-data-bs
         # python baostock_data.py basic
-        python baostock_data.py adjust --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs
-        python baostock_data.py klines --start-date=$FIRST_DAY  --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs
+        python baostock_data.py adjust --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs --workers=4
+        python baostock_data.py klines --start-date=$FIRST_DAY  --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs --workers=4
+      env:
+        MODELSCOPE_ACCESS_TOKEN: ${{ secrets.MS_TOKEN }}
 
     - name: Download dataset
       run: |
