@@ -25,3 +25,4 @@ jobs:
         pip install playwright playwright-stealth
         playwright install firefox
         playwright install-deps
+        python amac.py download
