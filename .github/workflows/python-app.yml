@@ -37,6 +37,6 @@ jobs:
 
         LAST_DAY=$(date -d "$NEXT_MONTH_FIRST -1 day" +%Y-%m-%d)
         python baostock_data.py basic --upload --repo-id=jzhongsun/novas-data-bs
-        python baostock_data.py klines --start-date=$FIRST_DAY  --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs --workers=12
+        python baostock_data.py klines --start-date=$FIRST_DAY  --end-date=$LAST_DAY --upload --repo-id=jzhongsun/novas-data-bs --workers=1
       env:
         MODELSCOPE_ACCESS_TOKEN: ${{ secrets.MS_TOKEN }}
