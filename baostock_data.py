@@ -455,7 +455,7 @@ def _worker_adjust_chunk(
             if not df.empty:
                 results.append((code, df))
 
-            if i % 200 == 0 or i == total:
+            if i % 50 == 0 or i == total:
                 print(f"[worker] {i}/{total} (got={len(results)})", flush=True)
     finally:
         bs.logout()
